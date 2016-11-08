@@ -1,4 +1,5 @@
 { newScope, stdenv, makeWrapper, makeDesktopItem, ed, overrideCC, pkgs
+, gnome
 
 # package customization
 , channel ? "stable"
