@@ -54,6 +54,10 @@ let
               jobs.nix-repl.x86_64-linux
               jobs.nix-repl.i686-linux
               jobs.nix-repl.x86_64-darwin
+              # Having a broken nixops would be a very poor advertisement
+              jobs.nixops.x86_64-linux
+              jobs.nixops.i686-linux
+              jobs.nixops.x86_64-darwin
               # Needed by travis-ci to test PRs
               jobs.nox.i686-linux
               jobs.nox.x86_64-linux
