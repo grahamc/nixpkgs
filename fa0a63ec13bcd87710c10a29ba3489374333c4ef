@@ -1,0 +1,1 @@
+Previously fail2ban would not block all ports opened by SSH
