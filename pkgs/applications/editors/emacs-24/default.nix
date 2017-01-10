@@ -6,6 +6,8 @@
 , withGTK3 ? false, gtk3 ? null
 , withGTK2 ? true, gtk2
 , enableTTYTrueColor ? false
+
+, pkgs
 }:
 
 assert (libXft != null) -> libpng != null;      # probably a bug
@@ -20,6 +22,83 @@ let
     if withGTK3 then "gtk3"
     else if withGTK2 then "gtk2"
     else "lucid";
+
+
+
+  keyset = { fingerprints, sha256 }:
+  stdenv.mkDerivation {
+    name = "keyset";
+    PATH = (lib.makeBinPath (with pkgs; [
+      gnupg
+      gnused
+      coreutils
+      curl
+      tree
+    ]));
+    builder = (pkgs.writeScript "keyring.sh" ''
+      #!${pkgs.bash}/bin/bash
+
+
+      HOME=$(pwd)
+
+      KEY="$(echo '${(builtins.head fingerprints)}' | sed -e 's/ //g' -e 's/^/0x/')"
+
+      mkdir $out
+      curl "http://pgp.mit.edu/pks/lookup?op=get&search=$KEY" > "$out/$KEY.key"
+
+    '');
+
+    outputHashAlgo = "sha256";
+    outputHashMode = "recursive";
+    outputHash = sha256;
+  };
+
+  keychain = {
+    emacs = keyset {
+      fingerprints = [
+        "28D3 BED8 51FD F3AB 57FE F93C 2335 87A4 7C20 7910" # nicolas@petton.fr
+      ];
+      sha256 = "118k6z02qp08xxw1srn33kdqwnc0i7xwrimvz3fqw9y2iwy9c4xg";
+    };
+  };
+
+  gpgcheck = {
+    emacs = { ... }@ args: (verifysignature (args // { keys = keychain.emacs;}));
+  };
+
+  verifysignature = { src, signature, keys }:
+  stdenv.mkDerivation {
+    name = src.name;
+    inherit keys src;
+
+    PATH = (lib.makeBinPath (with pkgs; [
+      gnupg
+      gnused
+      coreutils
+      curl
+      tree
+      which
+    ]));
+
+    inherit signature;
+
+    builder = (pkgs.writeScript "fetchsigned.sh" ''
+      #!${pkgs.bash}/bin/bash
+
+      set -eux
+
+      HOME=$(pwd)
+
+      cat $keys/* | gpg2 --import #*/ hi emacs
+
+      tree -a
+      gpgv2 --keyring=./.gnupg/pubring.kbx "$signature" "$src"
+
+      cp $src $out;
+    '');
+  };
+
+
 in
 
 stdenv.mkDerivation rec {
@@ -27,9 +106,14 @@ stdenv.mkDerivation rec {
 
   builder = ./builder.sh;
 
-  src = fetchurl {
-    url    = "mirror://gnu/emacs/${name}.tar.xz";
-    sha256 = "0kn3rzm91qiswi0cql89kbv6mqn27rwsyjfb8xmwy9m5s8fxfiyx";
+
+  src = gpgcheck.emacs {
+    src = fetchurl {
+      name = "foo.tar.xz";
+      url = "mirror://gnu//emacs/${name}.tar.xz";
+      sha256 = "0kn3rzm91qiswi0cql89kbv6mqn27rwsyjfb8xmwy9m5s8fxfiyx";
+    };
+    signature = builtins.fetchurl "https://ftp.gnu.org/gnu/emacs/${name}.tar.xz.sig";
   };
 
   patches = lib.optionals stdenv.isDarwin [
