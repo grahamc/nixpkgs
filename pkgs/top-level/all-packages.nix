@@ -16538,28 +16538,6 @@ with pkgs;
 
   kakasi = callPackage ../tools/text/kakasi { };
 
-  kde4 = recurseIntoAttrs pkgs.kde414;
-
-  kde414 =
-    kdePackagesFor
-      {
-        libusb = libusb1;
-        python2Packages = python2Packages;
-        inherit (python2Packages) python;
-        libcanberra = libcanberra_kde;
-        boost = boost155;
-        kdelibs = kde5.kdelibs;
-        subversionClient = pkgs.subversion18.override {
-          bdbSupport = false;
-          perlBindings = true;
-          pythonBindings = true;
-        };
-        ruby = ruby_2_2; # see https://github.com/NixOS/nixpkgs/pull/12610#issuecomment-188666473
-        ffmpeg = ffmpeg_2; # ffmpegthumb doesn't build otherwise
-      }
-      ../desktops/kde-4.14;
-
-
   kdePackagesFor = extra: dir:
     let
       # list of extra packages not included in KDE
