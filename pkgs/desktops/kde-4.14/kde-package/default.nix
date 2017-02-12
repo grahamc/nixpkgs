@@ -23,6 +23,7 @@ rec {
     inherit branch;
     platforms = stdenv.lib.platforms.linux;
     inherit (qt4.meta) maintainers;
+    broken = true;
   };
 
   # KDE package built from the whole tarball
