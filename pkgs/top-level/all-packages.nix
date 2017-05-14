@@ -18751,4 +18751,33 @@ with pkgs;
   xib2nib = callPackage ../development/tools/xib2nib {};
 
   linode-cli = callPackage ../tools/virtualization/linode-cli { };
+
+  luminance = stdenv.mkDerivation {
+    name = "luminance";
+
+    buildInputs = [
+      autoreconfHook
+      git
+      gnome3.gsettings_desktop_schemas
+      pkgconfig
+      gnome3.gtk
+      (python35.withPackages (pp:  [
+        pp.pygobject3
+        gtk3
+      ]))
+      python35Packages.pygobject3
+    ];
+    src = fetchFromGitHub {
+      owner = "craigcabrey";
+      repo = "luminance";
+      rev = "33a274c4254c71cb414e0ac93ee8dd02bc8e508e";
+      sha256 = "07z4m911ja9qbx28qmj7h4p5dyjj8ivj78xk168y78mh8m6sdxj3";
+    };
+    patches = [
+      (fetchpatch {
+        url = "https://github.com/grahamc/luminance/commit/f382c6208eeed6b9d7e240c12349077b776263b7.patch";
+        sha256 = "0bsfyfid9ydnm5d2sxm3gzzzh40hs3jmx2c2q88h7agldzsqavlh";
+      })
+    ];
+  };
 }
