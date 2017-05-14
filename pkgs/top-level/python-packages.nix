@@ -8643,6 +8643,26 @@ in {
 
   phpserialize = callPackage ../development/python-modules/phpserialize { };
 
+  phue = buildPythonPackage rec {
+    name = "phue-${version}";
+    version = "0.9";
+
+    src = self.fetchPypi {
+      pname  = "phue";
+      sha256 = "1mrcia8wffcl4d5wr3bjfa76bqpfyj2l37sl10kpn9nkzmsm9dsq";
+      inherit version;
+    };
+
+    doCheck = true;
+
+    meta = {
+      description = "A Python library for the Philips Hue system";
+      homepage = "https://github.com/studioimaginaire/phue";
+      license = licenses.mit;
+      maintainers = with maintainers; [ grahamc ];
+    };
+  };
+
   netdisco = buildPythonPackage rec {
     name = "netdisco-${version}";
     version = "1.0.0";
