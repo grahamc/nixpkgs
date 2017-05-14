@@ -31313,12 +31313,12 @@ EOF
 
   zeroconf = buildPythonPackage rec {
     pname = "zeroconf";
-    version = "0.18.0";
+    version = "0.19.0";
     name = "${pname}-${version}";
 
     src = fetchPypi {
       inherit pname version;
-      sha256 = "0s1840v2h4h19ad8lfadbm3dhzs8bw9c5c3slkxql1zsaiycvjy2";
+      sha256 = "0xqidm5fq2h4w4acd08hlk2cdfadwkr2laivz58ai8jgzd4xcn4c";
     };
 
     propagatedBuildInputs = with self; [ netifaces six enum-compat ];
