@@ -8643,6 +8643,28 @@ in {
 
   phpserialize = callPackage ../development/python-modules/phpserialize { };
 
+  netdisco = buildPythonPackage rec {
+    name = "netdisco-${version}";
+    version = "1.0.0";
+
+    src = self.fetchPypi {
+      pname  = "netdisco";
+      sha256 = "18nlpgvzblgcb7z70n84zs5hywwkn0vvdaznqsc4w814ab5il577";
+      inherit version;
+    };
+
+    propagatedBuildInputs = with self; [ zeroconf requests ];
+
+    doCheck = true;
+
+    meta = {
+      description = "Discover devices on your local network";
+      homepage = "https://github.com/home-assistant/netdisco";
+      license = licenses.asl20;
+      maintainers = with maintainers; [ grahamc ];
+    };
+  };
+
   pies = buildPythonPackage rec {
     name = "pies-2.6.5";
 
