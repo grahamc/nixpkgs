@@ -1,0 +1,22 @@
+From e202ab2ca463c155f6bddbe8a1359abe5d6c4ff0 Mon Sep 17 00:00:00 2001
+From: Graham Christensen <graham@grahamc.com>
+Date: Sun, 21 May 2017 07:13:31 -0400
+Subject: [PATCH] Specify out path in sia-gpu-miner.cl path
+
+---
+ sia-gpu-miner.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/sia-gpu-miner.c b/sia-gpu-miner.c
+index d1d74e2..47d399d 100644
+--- a/sia-gpu-miner.c
++++ b/sia-gpu-miner.c
+@@ -453,7 +453,7 @@ int main(int argc, char *argv[]) {
+ 	printf("Initializing...\n");
+ 	fflush(stdout);
+ 	FILE *fp;
+-	const char fileName[] = "./sia-gpu-miner.cl";
++	const char fileName[] = "@out@/lib/sia-gpu-miner.cl";
+ 	size_t source_size;
+ 	char *source_str;
+ 	fp = fopen(fileName, "r");
