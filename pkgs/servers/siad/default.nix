@@ -2,7 +2,7 @@
 { stdenv, buildGoPackage, fetchgit, fetchhg, fetchbzr, fetchsvn }:
 
 buildGoPackage rec {
-  name = "Siad-${version}";
+  name = "Sia-unstable-${version}";
   version = "2017-05-19";
   rev = "4c624d99e2ea89d3f1e9a40917970ee273a891a0";
 

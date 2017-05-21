@@ -13,7 +13,7 @@ in stdenv.mkDerivation {
     mkdir -p tmp
     cd tmp
     export GOPATH=`pwd`
-    go get -u github.com/NebulousLabs/Sia/siad
+    go get -u github.com/NebulousLabs/Sia/...
     cd src/github.com/NebulousLabs/Sia/siad
     go2nix save
     mv *.nix ../../../../../../
