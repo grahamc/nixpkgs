@@ -16,7 +16,7 @@ in stdenv.mkDerivation {
     go get -u github.com/NebulousLabs/Sia/siad
     cd src/github.com/NebulousLabs/Sia/siad
     go2nix save
-    mv *.nix ../../../../../
+    mv *.nix ../../../../../../
     set +eux
   '';
 }

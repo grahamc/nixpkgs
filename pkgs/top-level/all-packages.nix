@@ -11315,6 +11315,8 @@ with pkgs;
       # see also openssl, which has/had this same trick
   };
 
+  siad = callPackage ../servers/siad { };
+
   sipcmd = callPackage ../applications/networking/sipcmd { };
 
   sipwitch = callPackage ../servers/sip/sipwitch { };
@@ -13121,6 +13123,7 @@ with pkgs;
   seth = self.altcoins.seth;
 
   stellar-core = self.altcoins.stellar-core;
+  sia-miner = callPackage ../tools/misc/siaminer { };
 
   aumix = callPackage ../applications/audio/aumix {
     gtkGUI = false;
