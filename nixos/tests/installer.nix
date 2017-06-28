@@ -255,7 +255,9 @@ let
         <title>Installation with ${name}</title>
 
         <screen>
-          {createPartitions}
+          <![CDATA[
+          ${createPartitions}
+          ]]>
         </screen>
 
         </section>
