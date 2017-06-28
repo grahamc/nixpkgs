@@ -65,7 +65,7 @@ let
       chmod -R u+w .
       ln -s ${modulesDoc} configuration/modules.xml
       ln -s ${optionsDocBook} options-db.xml
-      echo "${version}" > version
+      echo -n "${version}" > version
     '';
 
   toc = builtins.toFile "toc.xml"
