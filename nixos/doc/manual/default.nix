@@ -51,6 +51,21 @@ let
 
   sources = lib.sourceFilesBySuffices ./. [".xml"];
 
+  installDocList =
+    let
+      tests = import ../../tests/installer.nix {};
+      names = builtins.attrNames tests;
+    in (builtins.map (name: tests."${name}".doc) names);
+
+  installDoc = pkgs.writeText "installation-generated.xml" ''
+    <section xmlns:xi="http://www.w3.org/2001/XInclude">
+      <title>Tested Partitioning Schemes</title>
+    ${(lib.concatMapStrings (path: ''
+      <xi:include href="${path}" />
+    '') installDocList)}
+    </section>
+  '';
+
   modulesDoc = builtins.toFile "modules.xml" ''
     <section xmlns:xi="http://www.w3.org/2001/XInclude" id="modules">
     ${(lib.concatMapStrings (path: ''
@@ -63,6 +78,7 @@ let
     ''
       cp -prd $sources/* . # */
       chmod -R u+w .
+      ln -s ${installDoc} installation/installing-generated.xml
       ln -s ${modulesDoc} configuration/modules.xml
       ln -s ${optionsDocBook} options-db.xml
       echo -n "${version}" > version

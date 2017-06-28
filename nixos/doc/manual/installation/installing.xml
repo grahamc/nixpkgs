@@ -273,9 +273,11 @@ drive (here <filename>/dev/sda</filename>).  <xref linkend="ex-config"
 }</screen>
 </example>
 
+<xi:include href="installing-generated.xml" />
 <xi:include href="installing-uefi.xml" />
 <xi:include href="installing-usb.xml" />
 <xi:include href="installing-pxe.xml" />
 <xi:include href="installing-virtualbox-guest.xml" />
+
 
 </chapter>

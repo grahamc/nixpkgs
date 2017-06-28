@@ -176,7 +176,7 @@ let
     , grubVersion ? 2, grubDevice ? "/dev/vda", grubIdentifier ? "uuid"
     , enableOCR ? false, meta ? {}
     }:
-    makeTest {
+    (makeTest {
       inherit enableOCR;
       name = "installer-" + name;
       meta = with pkgs.stdenv.lib.maintainers; {
@@ -243,6 +243,23 @@ let
         inherit bootLoader createPartitions preBootCommands
                 grubVersion grubDevice grubIdentifier extraConfig;
       };
+    }) // {
+      doc = pkgs.writeText "installation-${name}.xml"
+        ''
+        <section xmlns="http://docbook.org/ns/docbook"
+                 xmlns:xlink="http://www.w3.org/1999/xlink"
+                 xmlns:xi="http://www.w3.org/2001/XInclude"
+                 version="5.0"
+                 xml:id="sec-installation-${name}">
+
+        <title>Installation with ${name}</title>
+
+        <screen>
+          {createPartitions}
+        </screen>
+
+        </section>
+      '';
     };
 
 
