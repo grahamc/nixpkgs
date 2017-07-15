@@ -4,15 +4,242 @@
 
 <title>Ruby</title>
 
-<para>There currently is support to bundle applications that are
-packaged as Ruby gems. The utility "bundix" allows you to write a
-<filename>Gemfile</filename>, let bundler create a
-<filename>Gemfile.lock</filename>, and then convert this into a nix
-expression that contains all Gem dependencies automatically.</para>
+<para>Ruby tooling in Nixpkgs is centered around the
+<function>bundlerEnv</function> function, which accepts a few standard
+parameters:</para>
 
-<para>For example, to package sensu, we did:</para>
+<variablelist>
+  <varlistentry>
+    <term><varname>pname</varname></term>
+    <term><varname>name</varname></term>
+    <listitem>
+      <para>The name of the environment you're packaging.</para>
+      <para>Most use cases of <function>bundlerEnv</function> are for
+      packaging a specific top level gem. For this use case, set
+      <varname>pname</varname> to the name of that gem. For example:
+      <literal>pname = "sensu";</literal>. This will use
+      <literal>sensu</literal>'s packaged version, and automatically
+      set <varname>name</varname> including the version, to
+      <literal>sensu-x.x.x</literal></para>
+      <para>If you are packaging many dependencies for an application
+      or a script you may set the <varname>name</varname> directly.
+      </para>
+    </listitem>
+  </varlistentry>
 
-<screen>
+  <varlistentry>
+    <term><varname>gemdir</varname></term>
+    <term><varname>gemfile</varname></term>
+    <term><varname>lockfile</varname></term>
+    <term><varname>gemset</varname></term>
+    <listitem><para>To produce a bundler-compatible environment, we
+    must have a copy of your <filename>Gemfile</filename> and
+    <filename>Gemfile.lock</filename>, in addition to the
+    <filename>gemset.nix</filename>.</para>
+
+    <para>If you set <varname>gemdir</varname> to a directory,
+    <function>bundlerEnv</function> will look in that directory for
+    the three files by default. If you don't set
+    <varname>gemdir</varname> you are required to set the other three.
+    </para>
+
+    <para>You can set <varname>gemdir</varname> and also set any of
+    <varname>gemfile</varname>, <varname>lockfile</varname>, or
+    <varname>gemset</varname>.</para>
+
+    <para>In the following example, the Gemfile
+    will be sourced from <filename>./Gemfile</filename>, the
+    Gemfile.lock will be sourced from
+    <filename>./Gemfile.lock</filename> and the gemset.nix will be
+    sourced from <filename>./example/gemset.nix</filename>.</para>
+
+    <programlisting>
+bundlerEnv {
+  gemdir = ./.;
+  gemset = ./example/gemset.nix
+}</programlisting>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term><varname>ruby</varname></term>
+    <listitem><para>Optional, The Ruby package your gems will be
+    packaged with. Defaults to Nixpkg's default version of Ruby.
+    </para></listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term><varname>gemConfig</varname></term>
+    <listitem><para>Optional. Defaults to
+    <varname>defaultGemConfig</varname> in
+    <filename>pkgs/development/ruby-modules/gem-config</filename>.
+    Provides additional dependency information to gems during the
+    build. Many gems are configured in Nixpkgs correctly, however if
+    you see build failures you may need to pass your own
+    <varname>gemConfig</varname>. See
+    <xref linkend="sec-ruby-gemconfig" />.
+    </para></listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term><varname>postBuild</varname></term>
+    <listitem><para>Optional string. Extra commands to run after
+    constructing the bundler environment.</para></listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term><varname>meta</varname></term>
+    <listitem><para>Optional attrset. Additional meta information,
+    with the same properties as
+    <function>stdenv.mkDerivation</function>. Note the resulting
+    bundler environment will default to having its platform set to
+    match the provided ruby.</para></listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term><varname>groups</varname></term>
+    <listitem><para>Optional list, defaults to
+    <literal>["default"]</literal>. A list of Gemfile groups to
+    install in the environment.</para></listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term><varname>ignoreCollisions</varname></term>
+    <listitem><para>Optional boolean, defaults to false. If two gems
+    provide files that would overwrite each other, bundlerEnv will by
+    default prevent that behavior. Setting this to
+    <literal>true</literal> will allow colliding, and thusly
+    overwritten files.</para></listitem>
+  </varlistentry>
+</variablelist>
+
+<para>The utility "bundix" will convert a <filename>Gemfile</filename>
+and <filename>Gemfile.lock</filename> into a nix expression containing
+all the pinned Gem dependencies. Bundix can run
+<literal>bundler</literal> for you, generating the
+<filename>Gemfile.lock</filename> automatically, by passing the
+<option>--magic</option> option.</para>
+
+<section xml:id="sec-ruby-gemconfig">
+  <title>Specifying Build Requirements with GemConfig</title>
+
+  <para>Many gems have dependencies on installed libraries. Bundix
+  makes no attempt at capturing these dependencies or at expressing
+  them in the <filename>gemfile.nix</filename>. Instead, these system
+  dependencies are centralized in the <literal>gemConfig</literal>.
+  </para>
+
+  <para>Nixpkgs comes out of the box with a fairly effective default
+  gem config, capable of building many gems. It can be found at
+  <filename>pkgs/develoment/ruby-modules/gem-config/default.nix</filename>
+  and looks like this:
+  </para>
+
+  <example>
+    <title>gem config for mysql</title>
+    <programlisting><![CDATA[
+{
+...
+  mysql = attrs: {
+    buildInputs = [ mysql.lib zlib openssl ];
+  };
+...
+}
+]]></programlisting>
+
+    <para>This excerpt from the gem-config instructs bundlerEnv that,
+    when building the <literal>mysql</literal> ruby gem, to also
+    provide the libraries <literal>mysql.lib</literal>,
+    <literal>zlib</literal>, and <literal>openssl</literal>.</para>
+  </example>
+
+  <para>When the built-in gem config doesn't provide appropriate
+  dependencies, you may override the gem config by passing a custom
+  attrset to <function>bundlerEnv</function>'s
+  <parameter>gemConfig</parameter> parameter. Usually however, you
+  want to instead <emphasis>extend</emphasis> the default gemConfig,
+  like so:</para>
+
+  <example>
+    <title>providing custom build dependencies</title>
+    <programlisting><![CDATA[
+{ bundlerEnv, defaultGemConfig }:
+bundlerEnv {
+  pname = "examplegem";
+  gemdir = ./.;
+  gemConfig = defaultGemConfig // {
+    "examplegem" = {
+      buildInputs = [ libtool ];
+    };
+
+    "anothergem" = {
+      buildInputs = [ zlib ];
+    };
+  };
+}]]></programlisting>
+  </example>
+
+  <para>When <function>bundlerEnv</function> builds each gem, it calls
+  <function>buildRubyGem</function> with the data from
+  <parameter>gemConfig</parameter> and your
+  <filename>gemset.nix</filename>.</para>
+
+  <para>For a more thorough listing of how to configure a gem's
+  compilation, see <xref linkend="sec-ruby-build-ruby-gem" />.</para>
+</section>
+
+<section xml:id="sec-ruby-build-ruby-gem">
+  <title><function>buildRubyGem</function></title>
+  <para>_shrug_</para>
+</section>
+
+<section xml:id="ruby-bundlerEnv">
+  <title>Using <literal>bundlerEnv</literal></title>
+  <para>Resulting derivations also have two helpful items,
+  <literal>env</literal> and <literal>wrappedRuby</literal>. The first
+  one allows one to quickly drop into <command>nix-shell</command>
+  with the specified environment present. E.g.
+  <command>nix-shell -A sensu.env</command> would give you an
+  environment with Ruby preset so it has all the libraries necessary
+  for <literal>sensu</literal> in its paths. The second one can be
+  used to make derivations from custom Ruby scripts which have
+  <filename>Gemfile</filename>s with their dependencies specified. It
+  is a derivation with <command>ruby</command> wrapped so it can find
+  all the needed dependencies. For example, to make a derivation
+  <literal>my-script</literal> for a <filename>my-script.rb</filename>
+  (which should be placed in <filename>bin</filename>) you should run
+  <command>bundix</command> as specified above and then use
+  <literal>bundlerEnv</literal> like this:</para>
+
+  <programlisting>
+<![CDATA[let env = bundlerEnv {
+  name = "my-script-env";
+
+  inherit ruby;
+  gemfile = ./Gemfile;
+  lockfile = ./Gemfile.lock;
+  gemset = ./gemset.nix;
+};
+
+in stdenv.mkDerivation {
+  name = "my-script";
+  buildInputs = [ env.wrappedRuby ];
+  script = ./my-script.rb;
+  buildCommand = ''
+    install -D -m755 $script $out/bin/my-script
+    patchShebangs $out/bin/my-script
+  '';
+}]]>
+  </programlisting>
+</section>
+
+<section xml:id="ruby-packaging-sensu">
+  <title>An Example: Packaging Sensu</title>
+
+  <para>In order to package the ruby gem sensu, we ran the following
+  commands:</para>
+
+  <screen>
 <![CDATA[$ cd pkgs/servers/monitoring
 $ mkdir sensu
 $ cd sensu
@@ -39,49 +266,11 @@ bundlerEnv rec {
     platforms   = platforms.unix;
   };
 }]]>
-</screen>
+  </screen>
 
-<para>Please check in the <filename>Gemfile</filename>,
-<filename>Gemfile.lock</filename> and the
-<filename>gemset.nix</filename> so future updates can be run easily.
-</para>
-
-<para>Resulting derivations also have two helpful items,
-<literal>env</literal> and <literal>wrappedRuby</literal>. The first one
-allows one to quickly drop into <command>nix-shell</command> with the
-specified environment present. E.g.
-<command>nix-shell -A sensu.env</command> would give you an
-environment with Ruby preset so it has all the libraries necessary for
-<literal>sensu</literal> in its paths. The second one can be used to
-make derivations from custom Ruby scripts which have
->>>>>>> Reformat the ruby docs to be shorter lines
-<filename>Gemfile</filename>s with their dependencies specified. It is
-a derivation with <command>ruby</command> wrapped so it can find all
-the needed dependencies. For example, to make a derivation
-<literal>my-script</literal> for a <filename>my-script.rb</filename>
-(which should be placed in <filename>bin</filename>) you should run
-<command>bundix</command> as specified above and then use
-<literal>bundlerEnv</literal> like this:</para>
-
-<programlisting>
-<![CDATA[let env = bundlerEnv {
-  name = "my-script-env";
-
-  inherit ruby;
-  gemfile = ./Gemfile;
-  lockfile = ./Gemfile.lock;
-  gemset = ./gemset.nix;
-};
-
-in stdenv.mkDerivation {
-  name = "my-script";
-  buildInputs = [ env.wrappedRuby ];
-  script = ./my-script.rb;
-  buildCommand = ''
-    install -D -m755 $script $out/bin/my-script
-    patchShebangs $out/bin/my-script
-  '';
-}]]>
-</programlisting>
-
+  <para>Please check in the <filename>Gemfile</filename>,
+  <filename>Gemfile.lock</filename> and the
+  <filename>gemset.nix</filename> so future updates can be run easily.
+  </para>
+</section>
 </section>
