@@ -4,48 +4,78 @@
 
 <title>Ruby</title>
 
-<para>Ruby tooling in Nixpkgs is centered around the
-<function>bundlerEnv</function> function, which accepts a few standard
-parameters:</para>
+<refentry xml:id="fn-pkgs-bundlerEnv">
+  <refnamediv>
+    <refname>bundlerEnv</refname>
+    <refpurpose>
+      Install a set of Ruby gems in to an isolated environment.
+    </refpurpose>
+  </refnamediv>
+  <refsect1 role="description">
+    <title>Description</title>
+    <para>
+      Ruby tooling in Nixpkgs is centered around the
+      <function>bundlerEnv</function> function, which will build
+      an environment with your specified Ruby gems installed.
+    </para>
 
-<variablelist>
-  <varlistentry>
-    <term><varname>pname</varname></term>
-    <term><varname>name</varname></term>
-    <listitem>
-      <para>The name of the environment you're packaging.</para>
-      <para>Most use cases of <function>bundlerEnv</function> are for
+    <para>
+      Use the tool Bundix (<xref linkend="pkg-ruby-bundix" />) to
+      generate the inputs for <function>bundlerEnv</function>.
+    </para>
+  </refsect1>
+
+  <refsect1 role="parameters">
+    <title>Parameters</title>
+    <para>
+
+      <variablelist>
+        <varlistentry>
+          <term><parameter>name</parameter></term>
+          <listitem>
+            <para>The name for the environment you're building.
+            Optional, if you specify <parameter>pname</parameter>.
+            </para>
+          </listitem>
+        </varlistentry>
+
+          <term><parameter>pname</parameter></term>
+          <term><parameter>name</parameter></term>
+          <listitem>
+            <para>The name of the environment you're packaging.</para>
+            <para>Most use cases of <function>bundlerEnv</function>
+            are for
       packaging a specific top level gem. For this use case, set
-      <varname>pname</varname> to the name of that gem. For example:
+      <parameter>pname</parameter> to the name of that gem. For example:
       <literal>pname = "sensu";</literal>. This will use
       <literal>sensu</literal>'s packaged version, and automatically
-      set <varname>name</varname> including the version, to
+      set <parameter>name</parameter> including the version, to
       <literal>sensu-x.x.x</literal></para>
       <para>If you are packaging many dependencies for an application
-      or a script you may set the <varname>name</varname> directly.
+      or a script you may set the <parameter>name</parameter> directly.
       </para>
     </listitem>
   </varlistentry>
 
   <varlistentry>
-    <term><varname>gemdir</varname></term>
-    <term><varname>gemfile</varname></term>
-    <term><varname>lockfile</varname></term>
-    <term><varname>gemset</varname></term>
+    <term><parameter>gemdir</parameter></term>
+    <term><parameter>gemfile</parameter></term>
+    <term><parameter>lockfile</parameter></term>
+    <term><parameter>gemset</parameter></term>
     <listitem><para>To produce a bundler-compatible environment, we
     must have a copy of your <filename>Gemfile</filename> and
     <filename>Gemfile.lock</filename>, in addition to the
     <filename>gemset.nix</filename>.</para>
 
-    <para>If you set <varname>gemdir</varname> to a directory,
+    <para>If you set <parameter>gemdir</parameter> to a directory,
     <function>bundlerEnv</function> will look in that directory for
     the three files by default. If you don't set
-    <varname>gemdir</varname> you are required to set the other three.
+    <parameter>gemdir</parameter> you are required to set the other three.
     </para>
 
-    <para>You can set <varname>gemdir</varname> and also set any of
-    <varname>gemfile</varname>, <varname>lockfile</varname>, or
-    <varname>gemset</varname>.</para>
+    <para>You can set <parameter>gemdir</parameter> and also set any of
+    <parameter>gemfile</parameter>, <parameter>lockfile</parameter>, or
+    <parameter>gemset</parameter>.</para>
 
     <para>In the following example, the Gemfile
     will be sourced from <filename>./Gemfile</filename>, the
