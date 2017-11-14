@@ -142,6 +142,15 @@ in
         '';
       };
 
+      extraArguments = mkOption {
+        type = types.listOf types.string;
+        default = [];
+        example = [ "--skip-log-bin" ];
+        description = ''
+          Provide extra arguments to the MySQL daemon startup.
+        '';
+      };
+
       initialDatabases = mkOption {
         type = types.listOf (types.submodule {
           options = {
@@ -384,7 +393,7 @@ in
           fi
 
           # The last two environment variables are used for starting Galera clusters
-          exec ${cfg.package}/bin/mysqld --defaults-file=/etc/my.cnf ${mysqldOptions} $_WSREP_NEW_CLUSTER $_WSREP_START_POSITION
+          exec ${cfg.package}/bin/mysqld --defaults-file=/etc/my.cnf ${mysqldOptions} ${escapeShellArgs cfg.extraArguments} $_WSREP_NEW_CLUSTER $_WSREP_START_POSITION
         '';
 
         postStart = let
