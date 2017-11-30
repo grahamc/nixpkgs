@@ -15,7 +15,12 @@ lib.mapAttrs (n: v: v // { shortName = n; }) rec {
 
   afl21 = spdx {
     spdxId = "AFL-2.1";
-    fullName = "Academic Free License";
+    fullName = "Academic Free License v2.1";
+  };
+
+  afl3 = spdx {
+    spdxId = "AFL-3.0";
+    fullName = "Academic Free License v3.0";
   };
 
   agpl3 = spdx {
@@ -219,6 +224,7 @@ lib.mapAttrs (n: v: v // { shortName = n; }) rec {
   ffsl = {
     fullName = "Floodgap Free Software License";
     url = http://www.floodgap.com/software/ffsl/license.html;
+    free = false;
   };
 
   free = {
@@ -425,6 +431,11 @@ lib.mapAttrs (n: v: v // { shortName = n; }) rec {
     fullName = "Notion modified LGPL";
   };
 
+  nposl3 = spdx {
+    spdxId = "NPOSL-3.0";
+    fullName = "Non-Profit Open Software License 3.0";
+  };
+
   ofl = spdx {
     spdxId = "OFL-1.1";
     fullName = "SIL Open Font License 1.1";
@@ -438,6 +449,16 @@ lib.mapAttrs (n: v: v // { shortName = n; }) rec {
   openssl = spdx {
     spdxId = "OpenSSL";
     fullName = "OpenSSL License";
+  };
+
+  osl21 = spdx {
+    spdxId = "OSL-2.1";
+    fullName = "Open Software License 2.1";
+  };
+
+  osl3 = spdx {
+    spdxId = "OSL-3.0";
+    fullName = "Open Software License 3.0";
   };
 
   php301 = spdx {

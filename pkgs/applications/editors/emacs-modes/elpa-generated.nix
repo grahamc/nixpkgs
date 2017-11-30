@@ -700,10 +700,10 @@
     ebdb = callPackage ({ cl-lib ? null, elpaBuild, emacs, fetchurl, lib, seq }:
     elpaBuild {
         pname = "ebdb";
-        version = "0.4.1";
+        version = "0.4.2";
         src = fetchurl {
-          url = "https://elpa.gnu.org/packages/ebdb-0.4.1.tar";
-          sha256 = "0gv1q1xkhjab0l77c92znn6x0dfdbnj6hc48axmrx6a7zwbm3g2r";
+          url = "https://elpa.gnu.org/packages/ebdb-0.4.2.tar";
+          sha256 = "1j9hgxa6csj3iz5vrl22xvhl9lxhig0n1cixgzhs1sb3z3nn2li6";
         };
         packageRequires = [ cl-lib emacs seq ];
         meta = {
@@ -755,10 +755,10 @@
     el-search = callPackage ({ elpaBuild, emacs, fetchurl, lib, stream }:
     elpaBuild {
         pname = "el-search";
-        version = "1.3.2";
+        version = "1.4";
         src = fetchurl {
-          url = "https://elpa.gnu.org/packages/el-search-1.3.2.tar";
-          sha256 = "0lf0hk2pvy9yrb02sa3bg0hipshbgl9m4hx7db46jvmz5bf15nfq";
+          url = "https://elpa.gnu.org/packages/el-search-1.4.tar";
+          sha256 = "0fzsq1wdkb94dk67ligdwc7kyl0x9bifgl2qvvf0hsj4zws4pgjg";
         };
         packageRequires = [ emacs stream ];
         meta = {
@@ -1053,10 +1053,10 @@
       }) {};
     hyperbole = callPackage ({ elpaBuild, emacs, fetchurl, lib }: elpaBuild {
         pname = "hyperbole";
-        version = "6.0.2";
+        version = "7.0.0";
         src = fetchurl {
-          url = "https://elpa.gnu.org/packages/hyperbole-6.0.2.tar";
-          sha256 = "0nyihi7j2061jpdzl4mf4pki840hkfpwj0m2sqz0nqxd689ckwpg";
+          url = "https://elpa.gnu.org/packages/hyperbole-7.0.0.tar";
+          sha256 = "07cy40yfxwka1r6i01pgrf9a3n9ms5xw2x486jd803dhfkm3113b";
         };
         packageRequires = [ emacs ];
         meta = {
@@ -1356,6 +1356,20 @@
           license = lib.licenses.free;
         };
       }) {};
+    mines = callPackage ({ cl-lib ? null, elpaBuild, emacs, fetchurl, lib }:
+    elpaBuild {
+        pname = "mines";
+        version = "1.2";
+        src = fetchurl {
+          url = "https://elpa.gnu.org/packages/mines-1.2.tar";
+          sha256 = "1xwnw2hyk1qz98mdnckk0i05li0gzygq12kkmrlidxnk7ngbq9vw";
+        };
+        packageRequires = [ cl-lib emacs ];
+        meta = {
+          homepage = "https://elpa.gnu.org/packages/mines.html";
+          license = lib.licenses.free;
+        };
+      }) {};
     minibuffer-line = callPackage ({ elpaBuild, fetchurl, lib }: elpaBuild {
         pname = "minibuffer-line";
         version = "0.1";
@@ -1464,10 +1478,10 @@
       }) {};
     nlinum = callPackage ({ elpaBuild, fetchurl, lib }: elpaBuild {
         pname = "nlinum";
-        version = "1.8";
+        version = "1.8.1";
         src = fetchurl {
-          url = "https://elpa.gnu.org/packages/nlinum-1.8.el";
-          sha256 = "0bb1c8a68fzv59q2ri7ppbx8cm7sa8n4hxxvxv73db2dcgwrgwga";
+          url = "https://elpa.gnu.org/packages/nlinum-1.8.1.el";
+          sha256 = "0fx560yfjy6nqgs1d3fiv0h46i8q3r592clsia7nihkriah7rlwf";
         };
         packageRequires = [];
         meta = {
@@ -1556,10 +1570,10 @@
       }) {};
     org = callPackage ({ elpaBuild, fetchurl, lib }: elpaBuild {
         pname = "org";
-        version = "20171030";
+        version = "20171120";
         src = fetchurl {
-          url = "https://elpa.gnu.org/packages/org-20171030.tar";
-          sha256 = "1lszws6b5s4r7w871cyigs433dflf6w0y33fj6rzrq8240d5092i";
+          url = "https://elpa.gnu.org/packages/org-20171120.tar";
+          sha256 = "0hxy061g1qd77pvx8mq5rb9avx139x4z5nmjhdq518xhg7kxmq6a";
         };
         packageRequires = [];
         meta = {
@@ -2319,10 +2333,10 @@
       }) {};
     xclip = callPackage ({ elpaBuild, fetchurl, lib }: elpaBuild {
         pname = "xclip";
-        version = "1.3";
+        version = "1.4";
         src = fetchurl {
-          url = "https://elpa.gnu.org/packages/xclip-1.3.el";
-          sha256 = "1zlqr4sp8588sjga5c9b4prnsbpv3lr2wv8sih2p0s5qmjghc947";
+          url = "https://elpa.gnu.org/packages/xclip-1.4.el";
+          sha256 = "12rw790wzj10jcsqf292hc7qx18ybyay8jqji4shmrv16igrzl6p";
         };
         packageRequires = [];
         meta = {

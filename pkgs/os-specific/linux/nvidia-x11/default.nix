@@ -2,15 +2,17 @@
 
 let
   generic = args: callPackage (import ./generic.nix args) { };
+  kernel = callPackage # a hacky way of extracting parameters from callPackage
+    ({ kernel, libsOnly ? false }: if libsOnly then { } else kernel) { };
 in
 {
   # Policy: use the highest stable version as the default (on our master).
   stable = generic {
-    version = "384.90";
-    sha256_32bit = "0mq0h7g56m9zvr42ipy2664ph922754l0pdp8wpsmzfpkzg6g9lp";
-    sha256_64bit = "1ggylpzw1j217w64rspw4fhvq25wz0la0hhy0b1kxjpwy8h6ipqd";
-    settingsSha256 = "023jfbsxsbkjk78i9i6wd0sybv5hib2d7mfvy635w3anjcrsk5il";
-    persistencedSha256 = "166ya8pnv4frvrsp0x5zkg8li85vipags03wy6dlf8s940al92z2";
+    version = "387.22";
+    sha256_32bit = "16v4ljq07hs1xw6amc7cmddvmmmd3swli3b617xs8f3qcw54ym1r";
+    sha256_64bit = "1i0fmzsv4bkfxaw2wnnhj2z64gdyqd6xvxrsq7zj7gq7crcd6sma";
+    settingsSha256 = "0wszyfj9hcib7dcfin22nsrfsm1mb4rq6ha5fma7sq68p175j1yk";
+    persistencedSha256 = "0wrkmw8gw780vcl0s0d0vd8niaf741ji5sggxxqb1aa1w61rjf0d";
   };
 
   beta = generic {
@@ -22,23 +24,22 @@ in
   };
 
   legacy_340 = generic {
-    version = "340.102";
-    sha256_32bit = "0a484i37j00d0rc60q0bp6fd2wfrx2c4r32di9w5svqgmrfkvcb1";
-    sha256_64bit = "0nnz51d48a5fpnnmlz1znjp937k3nshdq46fw1qm8h00dkrd55ib";
-    settingsSha256 = "0nm5c06b09p6wsxpyfaqrzsnal3p1047lk6p4p2a0vksb7id9598";
-    persistencedSha256 = "1jwmggbph9zd8fj4syihldp2a5bxff7q1i2l9c55xz8cvk0rx08i";
+    version = "340.104";
+    sha256_32bit = "1l8w95qpxmkw33c4lsf5ar9w2fkhky4x23rlpqvp1j66wbw1b473";
+    sha256_64bit = "18k65gx6jg956zxyfz31xdp914sq3msn665a759bdbryksbk3wds";
+    settingsSha256 = "1vvpqimvld2iyfjgb9wvs7ca0b0f68jzfdpr0icbyxk4vhsq7sxk";
+    persistencedSha256 = "0zqws2vsrxbxhv6z0nn2galnghcsilcn3s0f70bpm6jqj9wzy7x8";
     useGLVND = false;
 
-    patches = [
-      (fetchpatch {
-        name = "kernel-4.10.patch";
-        url = https://git.archlinux.org/svntogit/packages.git/plain/nvidia-340xx/trunk/4.10.0_kernel.patch?id=53fb1df89;
-        sha256 = "171hb57m968qdjcr3h8ppfzhrchf573f39rdja86a1qq1gmrv7pa";
-      })
-      # from https://git.archlinux.org/svntogit/packages.git/plain/trunk/fs52243.patch?h=packages/nvidia-340xx
-      # with datestamps removed
-      ./fs52243.patch
-    ];
+    patches =
+      lib.optional (lib.versionOlder "4.14" (kernel.version or "0"))
+        (fetchurl {
+          url = "https://raw.githubusercontent.com/MilhouseVH/LibreELEC.tv/b5d2d6a1"
+              + "/packages/x11/driver/xf86-video-nvidia-legacy/patches/"
+              + "xf86-video-nvidia-legacy-0010-kernel-4.14.patch";
+          sha256 = "18clfpw03g8dxm61bmdkmccyaxir3gnq451z6xqa2ilm3j820aa5";
+        })
+      ;
   };
 
   legacy_304 = generic {

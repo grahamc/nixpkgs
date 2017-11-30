@@ -1,11 +1,7 @@
 { stdenv, fetchFromGitHub, meson, ninja, pkgconfig, glib, ncurses
 , mpd_clientlib, gettext }:
 
-let
-  rpath = stdenv.lib.makeLibraryPath [
-    glib ncurses mpd_clientlib
-  ];
-in stdenv.mkDerivation rec {
+stdenv.mkDerivation rec {
   name = "ncmpc-${version}";
   version = "0.28";
 
@@ -19,11 +15,7 @@ in stdenv.mkDerivation rec {
   buildInputs = [ glib ncurses mpd_clientlib ];
   nativeBuildInputs = [ meson ninja pkgconfig gettext ];
 
-  postFixup = ''
-    for elf in "$out"/bin/*; do
-      patchelf --set-rpath '${rpath}':"$out/lib" "$elf"
-    done
-  '';
+  NIX_LDFLAGS = stdenv.lib.optionalString stdenv.isDarwin "-lintl";
 
   meta = with stdenv.lib; {
     description = "Curses-based interface for MPD (music player daemon)";

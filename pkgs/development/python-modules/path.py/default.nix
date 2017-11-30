@@ -10,7 +10,7 @@
 buildPythonPackage rec {
   pname = "path.py";
   version = "10.4";
-  name = "path.py-${version}";
+  name = pname + "-" + version;
 
   src = fetchPypi {
     inherit pname version;
@@ -24,7 +24,7 @@ buildPythonPackage rec {
 
   meta = {
     description = "A module wrapper for os.path";
-    homepage = http://github.com/jaraco/path.py;
+    homepage = https://github.com/jaraco/path.py;
     license = lib.licenses.mit;
   };
 

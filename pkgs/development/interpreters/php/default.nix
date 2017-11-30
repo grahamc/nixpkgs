@@ -1,6 +1,8 @@
+# pcre functionality is tested in nixos/tests/php-pcre.nix
+
 { lib, stdenv, fetchurl, composableDerivation, autoconf, automake, flex, bison
 , mysql, libxml2, readline, zlib, curl, postgresql, gettext
-, openssl, pkgconfig, sqlite, config, libjpeg, libpng, freetype
+, openssl, pcre, pkgconfig, sqlite, config, libjpeg, libpng, freetype
 , libxslt, libmcrypt, bzip2, icu, openldap, cyrus_sasl, libmhash, freetds
 , uwimap, pam, gmp, apacheHttpd, libiconv, systemd }:
 
@@ -11,6 +13,8 @@ let
 
     let php7 = lib.versionAtLeast version "7.0";
         mysqlHeaders = mysql.lib.dev or mysql;
+        mysqlndSupport = config.php.mysqlnd or false;
+        mysqlBuildInputs = lib.optional (!mysqlndSupport) mysqlHeaders;
 
     in composableDerivation.composableDerivation {} (fixed: {
 
@@ -20,9 +24,11 @@ let
 
       enableParallelBuilding = true;
 
-  nativeBuildInputs = [ pkgconfig ];
-      buildInputs = [ flex bison ]
+      nativeBuildInputs = [ pkgconfig ];
+      buildInputs = [ flex bison pcre ]
         ++ lib.optional stdenv.isLinux systemd;
+
+      CXXFLAGS = lib.optional stdenv.cc.isClang "-std=c++11";
 
       flags = {
 
@@ -50,7 +56,7 @@ let
 
         ldap = {
           configureFlags = [
-            "--with-ldap"
+            "--with-ldap=/invalid/path"
             "LDAP_DIR=${openldap.dev}"
             "LDAP_INCDIR=${openldap.dev}/include"
             "LDAP_LIBDIR=${openldap.out}/lib"
@@ -110,13 +116,13 @@ let
         };
 
         mysql = {
-          configureFlags = ["--with-mysql"];
-          buildInputs = [ mysqlHeaders ];
+          configureFlags = ["--with-mysql${if mysqlndSupport then "=mysqlnd" else ""}"];
+          buildInputs = mysqlBuildInputs;
         };
 
         mysqli = {
-          configureFlags = ["--with-mysqli=${mysqlHeaders}/bin/mysql_config"];
-          buildInputs = [ mysqlHeaders ];
+          configureFlags = ["--with-mysqli=${if mysqlndSupport then "mysqlnd" else "${mysqlHeaders}/bin/mysql_config"}"];
+          buildInputs = mysqlBuildInputs;
         };
 
         mysqli_embedded = {
@@ -126,8 +132,8 @@ let
         };
 
         pdo_mysql = {
-          configureFlags = ["--with-pdo-mysql=${mysqlHeaders}"];
-          buildInputs = [ mysqlHeaders ];
+          configureFlags = ["--with-pdo-mysql=${if mysqlndSupport then "mysqlnd" else mysqlHeaders}"];
+          buildInputs = mysqlBuildInputs;
         };
 
         bcmath = {
@@ -283,6 +289,7 @@ let
 
       configureFlags = [
         "--with-config-file-scan-dir=/etc/php.d"
+        "--with-pcre-regex=${pcre.dev} PCRE_LIBDIR=${pcre}"
       ] ++ lib.optional stdenv.isDarwin "--with-iconv=${libiconv}"
         ++ lib.optional stdenv.isLinux  "--with-fpm-systemd";
 

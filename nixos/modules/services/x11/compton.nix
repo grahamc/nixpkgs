@@ -181,10 +181,10 @@ in {
     };
 
     backend = mkOption {
-      type = types.enum [ "glx" "xrender" ];
+      type = types.enum [ "glx" "xrender" "xr_glx_hybrid" ];
       default = "xrender";
       description = ''
-        Backend to use: <literal>glx</literal> or <literal>xrender</literal>.
+        Backend to use: <literal>glx</literal>, <literal>xrender</literal> or <literal>xr_glx_hybrid</literal>.
       '';
     };
 
@@ -221,7 +221,7 @@ in {
     };
 
     extraOptions = mkOption {
-      type = types.str;
+      type = types.lines;
       default = "";
       example = ''
         unredir-if-possible = true;

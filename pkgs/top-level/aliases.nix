@@ -47,6 +47,7 @@ mapAliases (rec {
   cv = progress; # added 2015-09-06
   debian_devscripts = debian-devscripts; # added 2016-03-23
   digikam5 = digikam; # added 2017-02-18
+  double_conversion = double-conversion; # 2017-11-22
   dwarf_fortress = dwarf-fortress; # added 2016-01-23
   dwbWrapper = dwb; # added 2015-01
   enblendenfuse = enblend-enfuse; # 2015-09-30
@@ -57,6 +58,7 @@ mapAliases (rec {
   foomatic_filters = foomatic-filters;  # 2016-08
   fuse_exfat = exfat;                   # 2015-09-11
   gettextWithExpat = gettext; # 2016-02-19
+  gdb-multitarget = gdb; # added 2017-11-13
   git-hub = gitAndTools.git-hub; # added 2016-04-29
   googleAuthenticator = google-authenticator; # added 2016-10-16
   grantlee5 = libsForQt5.grantlee;  # added 2015-12-19
@@ -83,6 +85,7 @@ mapAliases (rec {
   kdiff3-qt5 = kdiff3; # added 2017-02-18
   keepassx2-http = keepassx-reboot; # added 2016-10-17
   keepassx-reboot = keepassx-community; # added 2017-02-01
+  keepassx-community = keepassxc; # added 2017-11
   keybase-go = keybase;  # added 2016-08-24
   krename-qt5 = krename; # added 2017-02-18
   letsencrypt = certbot; # added 2016-05-16
@@ -116,6 +119,7 @@ mapAliases (rec {
   pgp-tools = signing-party; # added 2017-03-26
   pidgin-with-plugins = pidgin; # added 2016-06
   pidginlatexSF = pidginlatex; # added 2014-11-02
+  postage = pgmanage; # added 2017-11-03
   poppler_qt5 = libsForQt5.poppler;  # added 2015-12-19
   PPSSPP = ppsspp; # added 2017-10-01
   prometheus-statsd-bridge = prometheus-statsd-exporter;  # added 2017-08-27

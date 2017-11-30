@@ -207,11 +207,12 @@
       ripple-data-api = 186;
       mediatomb = 187;
       rdnssd = 188;
-      # ihaskell = 189; # unused
+      ihaskell = 189;
       i2p = 190;
       lambdabot = 191;
       asterisk = 192;
       plex = 193;
+      plexpy = 195;
       grafana = 196;
       skydns = 197;
       # ripple-rest = 198; # unused, removed 2017-08-12
@@ -299,6 +300,7 @@
       kanboard = 281;
       pykms = 282;
       kodi = 283;
+      restya-board = 284;
 
       # When adding a uid, make sure it doesn't match an existing gid. And don't use uids above 399!
 
@@ -483,7 +485,7 @@
       #ripple-data-api = 186; #unused
       mediatomb = 187;
       #rdnssd = 188; # unused
-      # ihaskell = 189; # unused
+      ihaskell = 189;
       i2p = 190;
       lambdabot = 191;
       asterisk = 192;
@@ -567,6 +569,7 @@
       kanboard = 281;
       pykms = 282;
       kodi = 283;
+      restya-board = 284;
 
       # When adding a gid, make sure it doesn't match an existing
       # uid. Users and groups with the same name should have equal

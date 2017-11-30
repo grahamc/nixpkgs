@@ -14,6 +14,8 @@ let
   #   src/common/command_utils.cpp
   # https://github.com/NixOS/nixpkgs/issues/13783
   tarWithGzip = lib.overrideDerivation gnutar (oldAttrs: {
+    # Original builder is bash 4.3.42 from bootstrap tools, too old for makeWrapper.
+    builder = "${bash}/bin/bash";
     buildInputs = (oldAttrs.buildInputs or []) ++ [ makeWrapper ];
     postInstall = (oldAttrs.postInstall or "") + ''
       wrapProgram $out/bin/tar --prefix PATH ":" "${gzip}/bin"
@@ -60,6 +62,8 @@ in stdenv.mkDerivation rec {
       "CXXFLAGS=-O2 -Wno-error=strict-aliasing"
     )
 
+    substituteInPlace 3rdparty/stout/include/stout/jsonify.hpp \
+      --replace '<xlocale.h>' '<locale.h>'
     # Fix cases where makedev(),major(),minor() are referenced through
     # <sys/types.h> instead of <sys/sysmacros.h>
     sed 1i'#include <sys/sysmacros.h>' -i src/linux/fs.cpp

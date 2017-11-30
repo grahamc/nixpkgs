@@ -235,6 +235,7 @@ in rec {
   tests.containers-tmpfs = callTest tests/containers-tmpfs.nix {};
   tests.containers-hosts = callTest tests/containers-hosts.nix {};
   tests.containers-macvlans = callTest tests/containers-macvlans.nix {};
+  tests.couchdb = callTest tests/couchdb.nix {};
   tests.docker = hydraJob (import tests/docker.nix { system = "x86_64-linux"; });
   tests.docker-edge = hydraJob (import tests/docker-edge.nix { system = "x86_64-linux"; });
   tests.dovecot = callTest tests/dovecot.nix {};
@@ -262,7 +263,7 @@ in rec {
   tests.hibernate = callTest tests/hibernate.nix {};
   tests.hound = callTest tests/hound.nix {};
   tests.i3wm = callTest tests/i3wm.nix {};
-  tests.initrd-network-ssh = callTest tests/initrd-network-ssh.nix {};
+  tests.initrd-network-ssh = callTest tests/initrd-network-ssh {};
   tests.installer = callSubTests tests/installer.nix {};
   tests.influxdb = callTest tests/influxdb.nix {};
   tests.ipv6 = callTest tests/ipv6.nix {};
@@ -270,6 +271,10 @@ in rec {
   tests.plasma5 = callTest tests/plasma5.nix {};
   tests.keymap = callSubTests tests/keymap.nix {};
   tests.initrdNetwork = callTest tests/initrd-network.nix {};
+  tests.kafka_0_9 = callTest tests/kafka_0_9.nix {};
+  tests.kafka_0_10 = callTest tests/kafka_0_10.nix {};
+  tests.kafka_0_11 = callTest tests/kafka_0_11.nix {};
+  tests.kafka_1_0 = callTest tests/kafka_1_0.nix {};
   tests.kernel-copperhead = callTest tests/kernel-copperhead.nix {};
   tests.kernel-latest = callTest tests/kernel-latest.nix {};
   tests.kernel-lts = callTest tests/kernel-lts.nix {};
@@ -286,6 +291,7 @@ in rec {
   tests.mongodb = callTest tests/mongodb.nix {};
   tests.mumble = callTest tests/mumble.nix {};
   tests.munin = callTest tests/munin.nix {};
+  tests.mutableUsers = callTest tests/mutable-users.nix {};
   tests.mysql = callTest tests/mysql.nix {};
   tests.mysqlBackup = callTest tests/mysql-backup.nix {};
   tests.mysqlReplication = callTest tests/mysql-replication.nix {};
@@ -299,13 +305,17 @@ in rec {
   tests.nfs3 = callTest tests/nfs.nix { version = 3; };
   tests.nfs4 = callTest tests/nfs.nix { version = 4; };
   tests.nginx = callTest tests/nginx.nix { };
+  tests.nghttpx = callTest tests/nghttpx.nix { };
   tests.leaps = callTest tests/leaps.nix { };
   tests.nsd = callTest tests/nsd.nix {};
   tests.openssh = callTest tests/openssh.nix {};
+  tests.owncloud = callTest tests/owncloud.nix {};
   tests.pam-oath-login = callTest tests/pam-oath-login.nix {};
   #tests.panamax = hydraJob (import tests/panamax.nix { system = "x86_64-linux"; });
   tests.peerflix = callTest tests/peerflix.nix {};
+  tests.php-pcre = callTest tests/php-pcre.nix {};
   tests.postgresql = callSubTests tests/postgresql.nix {};
+  tests.pgmanage = callTest tests/pgmanage.nix {};
   tests.postgis = callTest tests/postgis.nix {};
   #tests.pgjwt = callTest tests/pgjwt.nix {};
   tests.printing = callTest tests/printing.nix {};
@@ -322,6 +332,7 @@ in rec {
   tests.slim = callTest tests/slim.nix {};
   tests.smokeping = callTest tests/smokeping.nix {};
   tests.snapper = callTest tests/snapper.nix {};
+  tests.switchTest = callTest tests/switch-test.nix {};
   tests.taskserver = callTest tests/taskserver.nix {};
   tests.tomcat = callTest tests/tomcat.nix {};
   tests.udisks2 = callTest tests/udisks2.nix {};
@@ -329,7 +340,7 @@ in rec {
   tests.wordpress = callTest tests/wordpress.nix {};
   tests.xfce = callTest tests/xfce.nix {};
   tests.xmonad = callTest tests/xmonad.nix {};
-
+  tests.zookeeper = callTest tests/zookeeper.nix {};
 
   /* Build a bunch of typical closures so that Hydra can keep track of
      the evolution of closure sizes. */
