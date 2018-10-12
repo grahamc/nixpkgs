@@ -1056,6 +1056,8 @@ mapAttrsRecursive
   <subtitle><literal>mapAttrsRecursiveCond :: (AttrSet -> Bool) -> ([ String ] -> Any -> Any) -> AttrSet -> AttrSet</literal>
   </subtitle>
 
+  <xi:include href="./locations.xml" xpointer="lib.attrsets.mapAttrsRecursiveCond" />
+
   <para>
    Like <function>mapAttrsRecursive</function>, but it takes an additional
    predicate function that tells it whether to recursive into an attribute set.
