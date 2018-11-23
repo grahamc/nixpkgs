@@ -183,6 +183,7 @@ in
       type = types.str;
       example = "i686-linux";
       default = { system = builtins.currentSystem; };
+      defaultText = "{ system = builtins.currentSystem; }";
       description = ''
         Specifies the Nix platform type on which NixOS should be built.
         It is better to specify <code>nixpkgs.localSystem</code> instead.
