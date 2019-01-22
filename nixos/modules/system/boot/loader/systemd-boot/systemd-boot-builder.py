@@ -81,11 +81,11 @@ def describe_generation(generation_dir):
 def write_entry(profile, generation, machine_id):
     kernel = copy_from_profile(profile, generation, "kernel")
     initrd = copy_from_profile(profile, generation, "initrd")
-    try:
+
+    if os.path.exists(append_initrd_secrets):
         append_initrd_secrets = profile_path(profile, generation, "append-initrd-secrets")
         subprocess.check_call([append_initrd_secrets, "@efiSysMountPoint@%s" % (initrd)])
-    except FileNotFoundError:
-        pass
+
     if profile:
         entry_file = "@efiSysMountPoint@/loader/entries/nixos-%s-generation-%d.conf" % (profile, generation)
     else:
