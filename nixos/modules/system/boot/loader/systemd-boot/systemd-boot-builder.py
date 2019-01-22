@@ -34,17 +34,18 @@ options {kernel_params}
 """
 
 def write_loader_conf(profile, generation):
-    with open("@efiSysMountPoint@/loader/loader.conf.tmp", 'w') as f:
-        if "@timeout@" != "":
-            f.write("timeout @timeout@\n")
-        if profile:
-            f.write("default nixos-%s-generation-%d\n" % (profile, generation))
-        else:
-            f.write("default nixos-generation-%d\n" % (generation))
-        if not @editor@:
-            f.write("editor 0\n");
-        f.write("console-mode @consoleMode@\n");
-    os.rename("@efiSysMountPoint@/loader/loader.conf.tmp", "@efiSysMountPoint@/loader/loader.conf")
+    with tempfile.TemporaryDirectory() as tmpdir:
+        with open(f"{tmpdir}/loader.conf", 'w') as f:
+            if "@timeout@" != "":
+                f.write("timeout @timeout@\n")
+            if profile:
+                f.write("default nixos-%s-generation-%d\n" % (profile, generation))
+            else:
+                f.write("default nixos-generation-%d\n" % (generation))
+            if not @editor@:
+                f.write("editor 0\n");
+            f.write("console-mode @consoleMode@\n");
+        os.rename(f"{tmpdir}/loader.conf", "@efiSysMountPoint@/loader/loader.conf")
 
 def profile_path(profile, generation, name):
     return os.readlink("%s/%s" % (system_dir(profile, generation), name))
@@ -91,21 +92,22 @@ def write_entry(profile, generation, machine_id):
     else:
         entry_file = "@efiSysMountPoint@/loader/entries/nixos-generation-%d.conf" % (generation)
     generation_dir = os.readlink(system_dir(profile, generation))
-    tmp_path = "%s.tmp" % (entry_file)
     kernel_params = "systemConfig=%s init=%s/init " % (generation_dir, generation_dir)
 
     with open("%s/kernel-params" % (generation_dir)) as params_file:
         kernel_params = kernel_params + params_file.read()
-    with open(tmp_path, 'w') as f:
-        f.write(BOOT_ENTRY.format(profile=" [" + profile + "]" if profile else "",
-                    generation=generation,
-                    kernel=kernel,
-                    initrd=initrd,
-                    kernel_params=kernel_params,
-                    description=describe_generation(generation_dir)))
-        if machine_id is not None:
-            f.write("machine-id %s\n" % machine_id)
-    os.rename(tmp_path, entry_file)
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        with open(f"{tmpdir}/entry", 'w') as f:
+            f.write(BOOT_ENTRY.format(profile=" [" + profile + "]" if profile else "",
+                        generation=generation,
+                        kernel=kernel,
+                        initrd=initrd,
+                        kernel_params=kernel_params,
+                        description=describe_generation(generation_dir)))
+            if machine_id is not None:
+                f.write("machine-id %s\n" % machine_id)
+        os.rename(f"{tmpdir}/entry", entry_file)
 
 def mkdir_p(path):
     try:
