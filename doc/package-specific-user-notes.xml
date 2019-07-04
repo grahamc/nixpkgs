@@ -1,14 +1,10 @@
 <chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="package-specific-user-notes">
  <title>Package-specific usage notes</title>
  <para>
-         These chapters includes some notes
-         that apply to specific packages and should
-         answer some of the frequently asked questions
-         related to Nixpkgs use.
-
-  Some useful information related to package use 
-  can be found in <link linkend="chap-package-notes">package-specific development notes</link>.
-
+  These chapters includes some notes that apply to specific packages and should
+  answer some of the frequently asked questions related to Nixpkgs use. Some
+  useful information related to package use can be found in
+  <link linkend="chap-package-notes">package-specific development notes</link>.
  </para>
  <section xml:id="opengl">
   <title>OpenGL</title>
@@ -47,7 +43,6 @@
    <literal>locales</literal> of the package.
   </para>
  </section>
-
  <section xml:id="sec-emacs">
   <title>Emacs</title>
 
@@ -204,46 +199,43 @@ overrides = self: super: rec {
 </screen>
   </section>
  </section>
-
  <section xml:id="dlib">
   <title>DLib</title>
 
   <para>
-    <link xlink:href="http://dlib.net/">DLib</link> is a modern, C++-based toolkit which
-    provides several machine learning algorithms.
+   <link xlink:href="http://dlib.net/">DLib</link> is a modern, C++-based
+   toolkit which provides several machine learning algorithms.
   </para>
 
   <section xml:id="compiling-without-avx-support">
    <title>Compiling without AVX support</title>
 
    <para>
-     Especially older CPUs don't support
-     <link xlink:href="https://en.wikipedia.org/wiki/Advanced_Vector_Extensions">AVX</link>
-     (<abbrev>Advanced Vector Extensions</abbrev>) instructions that are used by DLib to
-     optimize their algorithms.
+    Especially older CPUs don't support
+    <link xlink:href="https://en.wikipedia.org/wiki/Advanced_Vector_Extensions">AVX</link>
+    (<abbrev>Advanced Vector Extensions</abbrev>) instructions that are used by
+    DLib to optimize their algorithms.
    </para>
 
    <para>
-    On the affected hardware errors like <literal>Illegal instruction</literal> will occur.
-    In those cases AVX support needs to be disabled:
+    On the affected hardware errors like <literal>Illegal instruction</literal>
+    will occur. In those cases AVX support needs to be disabled:
 <programlisting>self: super: {
   dlib = super.dlib.override { avxSupport = false; };
 }</programlisting>
    </para>
   </section>
  </section>
-
  <section xml:id="unfree-software">
   <title>Unfree software</title>
 
   <para>
    All users of Nixpkgs are free software users, and many users (and
    developers) of Nixpkgs want to limit and tightly control their exposure to
-   unfree software. At the same time, many users need (or want)
-   to run some specific
-   pieces of proprietary software. Nixpkgs includes some expressions for unfree
-   software packages. By default unfree software cannot be installed and
-   doesn’t show up in searches. To allow installing unfree software in a
+   unfree software. At the same time, many users need (or want) to run some
+   specific pieces of proprietary software. Nixpkgs includes some expressions
+   for unfree software packages. By default unfree software cannot be installed
+   and doesn’t show up in searches. To allow installing unfree software in a
    single Nix invocation one can export
    <literal>NIXPKGS_ALLOW_UNFREE=1</literal>. For a persistent solution, users
    can set <literal>allowUnfree</literal> in the Nixpkgs configuration.
@@ -256,7 +248,6 @@ overrides = self: super: rec {
    <literal>true</literal> for unfree packages that should be allowed.
   </para>
  </section>
-
  <section xml:id="sec-steam">
   <title>Steam</title>
 
@@ -407,7 +398,6 @@ overrides = self: super: rec {
    </para>
   </section>
  </section>
-
  <section xml:id="sec-citrix">
   <title>Citrix Receiver</title>
 
