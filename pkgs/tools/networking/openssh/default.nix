@@ -1,10 +1,11 @@
-{ stdenv, fetchurl, fetchpatch, zlib, openssl, libedit, pkgconfig, pam, autoreconfHook
+{ stdenv, fetchurl, fetchFromGitHub, fetchpatch, zlib, openssl, libedit, pkgconfig, pam, autoreconfHook, libfido2
 , etcDir ? null
 , hpnSupport ? false
 , withKerberos ? true
 , withGssapiPatches ? false
 , kerberos
 , linkOpenssl? true
+, betaU2f ? true
 }:
 
 let
@@ -29,7 +30,14 @@ stdenv.mkDerivation rec {
         url = "https://github.com/rapier1/openssh-portable/archive/hpn-KitchenSink-7_8_P1.tar.gz";
         sha256 = "05q5hxx7fzcgd8a5i0zk4fwvmnz4xqk04j489irnwm7cka7xdqxw";
       }
-    else
+      else if betaU2f then
+      fetchFromGitHub {
+        owner = "openssh";
+        repo = "openssh-portable";
+        rev = "fa7924008e838cded7e8a561356ffe5e06e0ed64"; # master on 21019-12-07
+        sha256 = "1iakp1amrk2qvdll1s2gki6ifn8rwpj7fjzf8xs5l5qm50db3zvz";
+      }
+      else
       fetchurl {
         url = "mirror://openbsd/OpenSSH/portable/${pname}-${version}.tar.gz";
         sha256 = "1b8sy6v0b8v4ggmknwcqx3y1rjcpsll0f1f8f4vyv11x4ni3njvb";
@@ -41,15 +49,6 @@ stdenv.mkDerivation rec {
 
       # See discussion in https://github.com/NixOS/nixpkgs/pull/16966
       ./dont_create_privsep_path.patch
-
-      # CVE-2018-20685, can probably be dropped with next version bump
-      # See https://sintonen.fi/advisories/scp-client-multiple-vulnerabilities.txt
-      # for details
-      (fetchpatch {
-        name = "CVE-2018-20685.patch";
-        url = https://github.com/openssh/openssh-portable/commit/6010c0303a422a9c5fa8860c061bf7105eb7f8b2.patch;
-        sha256 = "0q27i9ymr97yb628y44qi4m11hk5qikb1ji1vhvax8hp18lwskds";
-      })
 
       ./ssh-keysign.patch
     ]
@@ -66,6 +65,8 @@ stdenv.mkDerivation rec {
   buildInputs = [ zlib openssl libedit pam ]
     ++ optional withKerberos kerberos
     ++ optional hpnSupport autoreconfHook
+    ++ optional betaU2f autoreconfHook
+    ++ optional betaU2f libfido2
     ;
 
   preConfigure = ''
@@ -87,7 +88,8 @@ stdenv.mkDerivation rec {
   ] ++ optional (etcDir != null) "--sysconfdir=${etcDir}"
     ++ optional withKerberos (assert kerberos != null; "--with-kerberos5=${kerberos}")
     ++ optional stdenv.isDarwin "--disable-libutil"
-    ++ optional (!linkOpenssl) "--without-openssl";
+    ++ optional (!linkOpenssl) "--without-openssl"
+    ++ optional betaU2f "--with-security-key-builtin";
 
   enableParallelBuilding = true;
 
