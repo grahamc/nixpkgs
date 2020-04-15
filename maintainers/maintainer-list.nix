@@ -36,7 +36,11 @@
 
     More fields may be added in the future.
 
-    Please keep the list alphabetically sorted.
+    When editing this file:
+     * keep the list alphabetically sorted
+     * test the validity of the format with:
+         nix-build lib/tests/maintainers.nix
+
     See `./scripts/check-maintainer-github-handles.sh` for an example on how to work with this data.
 */
 {
