@@ -11,7 +11,8 @@ stdenv.mkDerivation rec {
 
   doCheck = true;
 
-  postBuild = ''
+  postInstall = ''
+    cp -r ${<localpath>} $out/local-path
     echo 'hello!'
   '';
 
