@@ -4,7 +4,8 @@ with lib;
 
 let
   cfg = config.amazonImage;
-in {
+in
+{
 
   imports = [ ../../../modules/virtualisation/amazon-image.nix ];
 
@@ -12,11 +13,13 @@ in {
   # experience, which prior to 4.15 was 255.
   # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/nvme-ebs-volumes.html#timeout-nvme-ebs-volumes
   config.boot.kernelParams =
-    let timeout =
-      if pkgs.lib.versionAtLeast config.boot.kernelPackages.kernel.version "4.15"
-      then "4294967295"
-      else  "255";
-    in [ "nvme_core.io_timeout=${timeout}" ];
+    let
+      timeout =
+        if pkgs.lib.versionAtLeast config.boot.kernelPackages.kernel.version "4.15"
+        then "4294967295"
+        else "255";
+    in
+      [ "nvme_core.io_timeout=${timeout}" ];
 
   options.amazonImage = {
     name = mkOption {
@@ -52,13 +55,13 @@ in {
     };
   };
 
-  config.system.build.amazonImage = import ../../../lib/make-disk-image.nix {
+  config.system.build.amazonImageOld = import ../../../lib/make-zfs-image.nix {
     inherit lib config;
     inherit (cfg) contents format name;
     pkgs = import ../../../.. { inherit (pkgs) system; }; # ensure we use the regular qemu-kvm package
     partitionTableType = if config.ec2.efi then "efi"
-                         else if config.ec2.hvm then "legacy+gpt"
-                         else "none";
+    else if config.ec2.hvm then "legacy+gpt"
+    else "none";
     diskSize = cfg.sizeMB;
     fsType = "ext4";
     configFile = pkgs.writeText "configuration.nix"
@@ -66,11 +69,11 @@ in {
         { modulesPath, ... }: {
           imports = [ "''${modulesPath}/virtualisation/amazon-image.nix" ];
           ${optionalString config.ec2.hvm ''
-            ec2.hvm = true;
-          ''}
+        ec2.hvm = true;
+      ''}
           ${optionalString config.ec2.efi ''
-            ec2.efi = true;
-          ''}
+        ec2.efi = true;
+      ''}
         }
       '';
     postVM = ''
