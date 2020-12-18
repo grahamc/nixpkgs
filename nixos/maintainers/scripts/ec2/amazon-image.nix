@@ -8,7 +8,10 @@ let
   imageBuilder = diskopts: if config.ec2.zfsRoot then
     (import ../../../lib/make-zfs-image.nix ({
       includeChannel = false;
-      poolProperties = {
+      bootPoolProperties = {
+        ashift = 12;
+      };
+      rootPoolProperties = {
         ashift = 12;
       };
     } // diskopts))
@@ -73,7 +76,8 @@ in {
     inherit lib config;
     inherit (cfg) contents format name;
     pkgs = import ../../../.. { inherit (pkgs) system; }; # ensure we use the regular qemu-kvm package
-    diskSize = cfg.sizeMB;
+    bootSize = 1000; # 1G is the minimum EBS volume
+    rootSize = cfg.sizeMB;
     configFile = pkgs.writeText "configuration.nix"
       ''
         { modulesPath, ... }: {
@@ -91,19 +95,24 @@ in {
         }
       '';
     postVM = ''
-      extension=''${diskImage##*.}
-      friendlyName=$out/${cfg.name}.$extension
-      mv "$diskImage" "$friendlyName"
-      diskImage=$friendlyName
+      extension=''${rootDiskImage##*.}
+      friendlyName=$out/${cfg.name}
+      rootDisk="$friendlyName.root.$extension"
+      bootDisk="$friendlyName.boot.$extension"
+      mv "$rootDiskImage" "$rootDisk"
+      mv "$bootDiskImage" "$bootDisk"
 
       mkdir -p $out/nix-support
-      echo "file ${cfg.format} $diskImage" >> $out/nix-support/hydra-build-products
+      echo "file ${cfg.format} $bootDisk" >> $out/nix-support/hydra-build-products
+      echo "file ${cfg.format} $rootDisk" >> $out/nix-support/hydra-build-products
 
       ${pkgs.jq}/bin/jq -n \
         --arg label ${lib.escapeShellArg config.system.nixos.label} \
         --arg system ${lib.escapeShellArg pkgs.stdenv.hostPlatform.system} \
-        --arg logical_bytes "$(${pkgs.qemu}/bin/qemu-img info --output json "$diskImage" | ${pkgs.jq}/bin/jq '."virtual-size"')" \
-        --arg file "$diskImage" \
+        --arg root_logical_bytes "$(${pkgs.qemu}/bin/qemu-img info --output json "$bootDisk" | ${pkgs.jq}/bin/jq '."virtual-size"')" \
+        --arg boot_logical_bytes "$(${pkgs.qemu}/bin/qemu-img info --output json "$rootDisk" | ${pkgs.jq}/bin/jq '."virtual-size"')" \
+        --arg root "$rootDisk" \
+        --arg boot "$bootDisk" \
         '$ARGS.named' \
         > $out/nix-support/image-info.json
     '';

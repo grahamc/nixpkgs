@@ -3,22 +3,55 @@
 , # The NixOS configuration to be installed onto the disk image.
   config
 
-, # The size of the disk, in megabytes.
-  diskSize ? 2048
-
-, # size of the boot partition, is only used if partitionTableType is
-  # either "efi" or "hybrid"
-  bootSize ? 1024
+, # The size of the root disk, in megabytes.
+  rootSize ? 2048
 
 , # The name of the ZFS pool
-  poolName ? "tank"
+  bootPoolName ? "boot"
+
+, # size of the boot disk
+  bootSize ? 1024
+, # features on the boot pool
+  # Note: the pool has no features enabled by default,
+  # and only this list of features is enabled. This list
+  # must match GRUB's supported list.
+  # See: https://github.com/openzfs/openzfs-docs/blame/master/docs/Getting%20Started/Debian/Debian%20Stretch%20Root%20on%20ZFS.rst#L200-L216
+  bootPoolFeatures ? [
+    "async_destroy"
+    "bookmarks"
+    "embedded_data"
+    "empty_bpobj"
+    "enabled_txg"
+    "extensible_dataset"
+    "filesystem_limits"
+    "hole_birth"
+    "large_blocks"
+    "lz4_compress"
+    "spacemap_histogram"
+    "userobj_accounting"
+  ]
 
 , # zpool properties
-  poolProperties ? {
+  bootPoolProperties ? {
     autoexpand = "on";
   }
 , # pool-wide filesystem properties
-  filesystemProperties ? {
+  bootPoolFilesystemProperties ? {
+    acltype = "posixacl";
+    atime = "off";
+    compression = "on";
+    mountpoint = "legacy";
+    xattr = "sa";
+  }
+, # The name of the ZFS pool
+  rootPoolName ? "tank"
+
+, # zpool properties
+  rootPoolProperties ? {
+    autoexpand = "on";
+  }
+, # pool-wide filesystem properties
+  rootPoolFilesystemProperties ? {
     acltype = "posixacl";
     atime = "off";
     compression = "on";
@@ -64,12 +97,14 @@ let
 
   compress = lib.optionalString (format == "qcow2-compressed") "-c";
 
-  filename = "nixos." + {
+  filenameSuffix = "." + {
     qcow2 = "qcow2";
     vdi = "vdi";
     vpc = "vhd";
     raw = "img";
   }.${formatOpt} or formatOpt;
+  bootFilename = "nixos.boot${filenameSuffix}";
+  rootFilename = "nixos.root${filenameSuffix}";
 
   # FIXME: merge with channel.nix / make-channel.nix.
   channelSources =
@@ -101,6 +136,7 @@ let
       config.system.build.nixos-install
       dosfstools
       e2fsprogs
+      gptfdisk
       nix
       parted
       utillinux
@@ -116,6 +152,13 @@ let
       properties
   );
 
+  featuresToProperties = features:
+    lib.listToAttrs
+      (builtins.map (feature: {
+        name = "feature@${feature}";
+        value = "enabled";
+      }) features);
+
   createDatasets =
     let
       datasetlist = lib.mapAttrsToList lib.nameValuePair datasets;
@@ -124,7 +167,7 @@ let
         let
           properties = stringifyProperties "-o" (value.properties or {});
         in
-          "zfs create -p ${properties} ${poolName}/${name}";
+          "zfs create -p ${properties} ${rootPoolName}/${name}";
     in
       lib.concatMapStringsSep "\n" cmd sorted;
 
@@ -136,7 +179,7 @@ let
       cmd = { name, value }:
         ''
           mkdir -p /mnt/${lib.escapeShellArg value.mount}
-          mount -t zfs ${poolName}/${name} /mnt/${lib.escapeShellArg value.mount}
+          mount -t zfs ${rootPoolName}/${name} /mnt/${lib.escapeShellArg value.mount}
         '';
     in
       lib.concatMapStringsSep "\n" cmd sorted;
@@ -169,7 +212,7 @@ let
                       name = attrs.mount;
                       value = {
                         fsType = "zfs";
-                        device = "${poolName}/${dataset}";
+                        device = "${rootPoolName}/${dataset}";
                       };
                     }
                 )
@@ -201,20 +244,29 @@ let
   ).runInLinuxVM (
     pkgs.runCommand name
       {
+        QEMU_OPTS = "-drive file=$bootDiskImage,if=virtio,cache=unsafe,werror=report"
+         + " -drive file=$rootDiskImage,if=virtio,cache=unsafe,werror=report";
         preVM = ''
           PATH=$PATH:${pkgs.qemu_kvm}/bin
           mkdir $out
-          diskImage=nixos.raw
-          qemu-img create -f raw $diskImage ${toString diskSize}M
+          bootDiskImage=boot.raw
+          qemu-img create -f raw $bootDiskImage ${toString bootSize}M
+
+          rootDiskImage=root.raw
+          qemu-img create -f raw $rootDiskImage ${toString rootSize}M
         '';
 
         postVM = ''
           ${if formatOpt == "raw" then ''
-          mv $diskImage $out/${filename}
+          mv $bootDiskImage $out/${bootFilename}
+          mv $rootDiskImage $out/${rootFilename}
         '' else ''
-          ${pkgs.qemu}/bin/qemu-img convert -f raw -O ${formatOpt} ${compress} $diskImage $out/${filename}
+          ${pkgs.qemu}/bin/qemu-img convert -f raw -O ${formatOpt} ${compress} $bootDiskImage $out/${bootFilename}
+          ${pkgs.qemu}/bin/qemu-img convert -f raw -O ${formatOpt} ${compress} $rootDiskImage $out/${rootFilename}
         ''}
-          diskImage=$out/${filename}
+          bootDiskImage=$out/${bootFilename}
+          rootDiskImage=$out/${rootFilename}
+          set -x
           ${postVM}
         '';
       } ''
@@ -224,29 +276,26 @@ let
       cp -sv /dev/vda /dev/sda
       cp -sv /dev/vda /dev/xvda
 
-      parted --script /dev/vda -- \
-        mklabel gpt \
-        mkpart no-fs 1MB 2MB \
-        align-check optimal 1 \
-        set 1 bios_grub on \
-        mkpart ESP fat32 8MB ${toString bootSize}MB \
-        align-check optimal 2 \
-        set 2 boot on \
-        mkpart primary ${toString bootSize}MB -1 \
-        align-check optimal 3 \
-        print
+      zpool create -d \
+        ${stringifyProperties "  -o" bootPoolProperties} \
+        ${stringifyProperties "  -o" (featuresToProperties bootPoolFeatures)} \
+        ${stringifyProperties "  -O" bootPoolFilesystemProperties} \
+        ${bootPoolName} /dev/vda
+      sgdisk -a1 -n2:34:2047 -t2:EF02 /dev/vda
+      parted --script /dev/vda -- print
+      zfs create ${bootPoolName}/boot
 
       zpool create \
-        ${stringifyProperties "  -o" poolProperties} \
-        ${stringifyProperties "  -O" filesystemProperties} \
-        ${poolName} /dev/vda3
+        ${stringifyProperties "  -o" rootPoolProperties} \
+        ${stringifyProperties "  -O" rootPoolFilesystemProperties} \
+        ${rootPoolName} /dev/vdb
+      parted --script /dev/vdb -- print
 
       ${createDatasets}
       ${mountDatasets}
 
       mkdir -p /mnt/boot
-      mkfs.vfat /dev/vda2 -n ESP
-      mount -t vfat /dev/vda2 /mnt/boot
+      mount -t zfs boot/boot /mnt/boot
 
       mount
 
@@ -274,7 +323,8 @@ let
       df -h
       umount /mnt/boot
       ${unmountDatasets}
-      zpool export ${poolName}
+      zpool export ${rootPoolName}
+      zpool export ${bootPoolName}
     ''
   );
 in

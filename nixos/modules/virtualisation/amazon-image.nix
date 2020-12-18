@@ -39,10 +39,13 @@ in
       autoResize = true;
     };
 
-    fileSystems."/boot" = mkIf (cfg.zfsRoot || cfg.efi) {
+    fileSystems."/boot" = if cfg.efi then {
       device = "/dev/disk/by-label/ESP";
       fsType = "vfat";
-    };
+    } else if cfg.zfsRoot then {
+      device = "boot/boot";
+      fsType = "zfs";
+    } else {};
 
     boot.zfs.devNodes = mkIf cfg.zfsRoot "/dev/";
 
