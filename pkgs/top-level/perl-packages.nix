@@ -8557,19 +8557,6 @@ let
     };
   };
 
-  gotofile = buildPerlPackage {
-    pname = "goto-file";
-    version = "0.005";
-    src = fetchurl {
-      url = "mirror://cpan/authors/id/E/EX/EXODIST/goto-file-0.005.tar.gz";
-      sha256 = "c6cdd5ee4a6cdcbdbf314d92a4f9985dbcdf9e4258048cae76125c052aa31f77";
-    };
-    buildInputs = [ Test2Suite ];
-    meta = {
-      description = "Stop parsing the current file and move on to a different one";
-      license = with lib.licenses; [ artistic1 gpl1Plus ];
-    };
-  };
 
   Graph = buildPerlPackage {
     pname = "Graph";
@@ -11303,19 +11290,6 @@ let
     };
   };
 
-  LongJump = buildPerlPackage {
-    pname = "Long-Jump";
-    version = "0.000001";
-    src = fetchurl {
-      url = "mirror://cpan/authors/id/E/EX/EXODIST/Long-Jump-0.000001.tar.gz";
-      sha256 = "d5d6456d86992b559d8f66fc90960f919292cd3803c13403faac575762c77af4";
-    };
-    buildInputs = [ Test2Suite ];
-    meta = {
-      description = "Mechanism for returning to a specific point from a deeply nested stack";
-      license = with lib.licenses; [ artistic1 gpl1Plus ];
-    };
-  };
 
   LongJump = buildPerlPackage {
     pname = "Long-Jump";
@@ -13406,24 +13380,6 @@ let
     };
   };
 
-  TestPostgreSQL = buildPerlModule {
-    pname = "Test-PostgreSQL";
-    version = "1.27";
-    src = fetchurl {
-      url = "mirror://cpan/authors/id/T/TJ/TJC/Test-PostgreSQL-1.27.tar.gz";
-      sha256 = "b1bd231693100cc40905fb0ba3173173201621de9c8301f21c5b593b0a46f907";
-    };
-    buildInputs = [ ModuleBuildTiny TestSharedFork pkgs.postgresql ];
-    propagatedBuildInputs = [ DBDPg DBI FileWhich FunctionParameters Moo TieHashMethod TryTiny TypeTiny ];
-
-    makeMakerFlags = "POSTGRES_HOME=${pkgs.postgresql}";
-
-    meta = {
-      homepage = https://github.com/TJC/Test-postgresql;
-      description = "PostgreSQL runner for tests";
-      license = with lib.licenses; [ artistic2 ];
-    };
-  };
 
   TestPostgreSQL = buildPerlModule {
     pname = "Test-PostgreSQL";
@@ -18871,19 +18827,6 @@ let
     };
   };
 
-  Test2PluginMemUsage = buildPerlPackage {
-    pname = "Test2-Plugin-MemUsage";
-    version = "0.002003";
-    src = fetchurl {
-      url = "mirror://cpan/authors/id/E/EX/EXODIST/Test2-Plugin-MemUsage-0.002003.tar.gz";
-      sha256 = "5e0662d5a823ae081641f5ce82843111eec1831cd31f883a6c6de54afdf87c25";
-    };
-    buildInputs = [ Test2Suite ];
-    meta = {
-      description = "Collect and display memory usage information";
-      license = with lib.licenses; [ artistic1 gpl1Plus ];
-    };
-  };
 
   Test2Harness = buildPerlPackage {
     pname = "Test2-Harness";
