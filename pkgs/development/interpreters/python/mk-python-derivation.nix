@@ -141,8 +141,13 @@ let
           in the ${attrName} of ${myName} to use a ${theirName} built from the same
           version of Python
 
-        * If ${theirName} provides executables, move the reference to ${theirName} in
-          ${myName} from ${attrName} to nativeBuildInputs
+        * If ${theirName} is used as a tool during the build, move the reference to
+          ${theirName} in ${myName} from ${attrName} to nativeBuildInputs
+
+        * If ${theirName} provides executables that are called at run time, pass its
+          bin path to makeWrapperArgs:
+
+              makeWrapperArgs = [ "--prefix PATH : ''${lib.makeBinPath [ ${drvName drv } ] }" ];
 
       ${optionalLocation}
     '';
