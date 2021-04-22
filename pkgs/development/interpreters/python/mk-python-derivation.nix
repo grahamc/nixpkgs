@@ -104,6 +104,45 @@ else
 let
   inherit (python) stdenv;
 
+  validatePythonMatches = let
+    isPythonModule = drv:
+      # all pythonModules have the pythonModule attribute
+      (drv ? "pythonModule")
+      # Some pythonModules are turned in to a pythonApplication by setting the field to false
+      && (!builtins.isBool drv.pythonModule);
+    isMismatchedPython = drv: drv.pythonModule != python;
+
+    optionalLocation = let
+        pos = builtins.unsafeGetAttrPos (if attrs ? "pname" then "pname" else "name") attrs;
+      in if pos == null then "" else " in ${pos.file}:${toString pos.line}:${toString pos.column}";
+
+    leftPadName = name: against: let
+        len = lib.max (lib.stringLength name) (lib.stringLength against);
+      in lib.strings.fixedWidthString len " " name;
+
+    drvName = drv: drv.pname or drv.name;
+    warnMismatch = drv: lib.warn ''
+      Warning: Python version mismatch in '${name}':
+
+      The Python derivation '${name}' depends on a Python derivation
+      named '${drvName drv}', but the two derivations use different versions
+      of Python:
+
+          ${leftPadName name (drvName drv)} uses ${python}
+          ${leftPadName (drvName drv) name} uses ${toString drv.pythonModule}
+
+      Suggestion: change ${name}'s propagatedBuildInputs to use a '${drvName drv}'
+      built from the same version of Python${optionalLocation}.
+    ''
+    drv;
+
+    checkDrv = drv:
+      if (isPythonModule drv) && (isMismatchedPython drv)
+      then warnMismatch drv
+      else drv;
+
+    in inputs: builtins.map (checkDrv) inputs;
+
   self = toPythonModule (stdenv.mkDerivation ((builtins.removeAttrs attrs [
     "disabled" "checkPhase" "checkInputs" "doCheck" "doInstallCheck" "dontWrapPythonPrograms" "catchConflicts" "format"
   ]) // {
@@ -143,7 +182,7 @@ let
 
     buildInputs = buildInputs ++ pythonPath;
 
-    propagatedBuildInputs = propagatedBuildInputs ++ [ python ];
+    propagatedBuildInputs = validatePythonMatches (propagatedBuildInputs ++ [ python ]);
 
     inherit strictDeps;
 
