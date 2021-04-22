@@ -114,29 +114,37 @@ let
 
     optionalLocation = let
         pos = builtins.unsafeGetAttrPos (if attrs ? "pname" then "pname" else "name") attrs;
-      in if pos == null then "" else " in ${pos.file}:${toString pos.line}:${toString pos.column}";
+      in if pos == null then "" else " at ${pos.file}:${toString pos.line}:${toString pos.column}";
 
     leftPadName = name: against: let
         len = lib.max (lib.stringLength name) (lib.stringLength against);
       in lib.strings.fixedWidthString len " " name;
 
     drvName = drv: drv.pname or drv.name;
-    warnMismatch = drv: lib.warn ''
-      Warning: Python version mismatch in '${name}':
 
-      The Python derivation '${name}' depends on a Python derivation
-      named '${drvName drv}', but the two derivations use different versions
+    warnMismatch = drv: let
+      myName = "'${name}'";
+      theirName = "'${drvName drv}'";
+    in lib.warn ''
+      Python version mismatch in ${myName}:
+
+      The Python derivation ${myName} depends on a Python derivation
+      named ${theirName}, but the two derivations use different versions
       of Python:
 
-          ${leftPadName name (drvName drv)} uses ${python}
-          ${leftPadName (drvName drv) name} uses ${toString drv.pythonModule}
+          ${leftPadName myName theirName} uses ${python}
+          ${leftPadName theirName myName} uses ${toString drv.pythonModule}
 
       Possible solutions:
-        * change ${name}'s ${attrName} to use a '${drvName drv}'
-          built from the same version of Python${optionalLocation}.
 
-        * move ${drvName drv} from ${attrName} to nativeBuildInputs.
+        * If ${theirName} is a Python library, change the reference to ${theirName}
+          in the ${attrName} of ${myName} to use a ${theirName} built from the same
+          version of Python
 
+        * If ${theirName} provides executables, move the reference to ${theirName} in
+          ${myName} from ${attrName} to nativeBuildInputs
+
+      ${optionalLocation}
     ''
     drv;
 
