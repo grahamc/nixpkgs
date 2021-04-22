@@ -125,7 +125,7 @@ let
     warnMismatch = drv: let
       myName = "'${name}'";
       theirName = "'${drvName drv}'";
-    in lib.warn ''
+    in throw ''
       Python version mismatch in ${myName}:
 
       The Python derivation ${myName} depends on a Python derivation
@@ -145,8 +145,7 @@ let
           ${myName} from ${attrName} to nativeBuildInputs
 
       ${optionalLocation}
-    ''
-    drv;
+    '';
 
     checkDrv = drv:
       if (isPythonModule drv) && (isMismatchedPython drv)
