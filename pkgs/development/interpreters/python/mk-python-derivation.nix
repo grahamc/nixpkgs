@@ -104,7 +104,7 @@ else
 let
   inherit (python) stdenv;
 
-  validatePythonMatches = let
+  validatePythonMatches = attrName: let
     isPythonModule = drv:
       # all pythonModules have the pythonModule attribute
       (drv ? "pythonModule")
@@ -131,7 +131,7 @@ let
           ${leftPadName name (drvName drv)} uses ${python}
           ${leftPadName (drvName drv) name} uses ${toString drv.pythonModule}
 
-      Suggestion: change ${name}'s propagatedBuildInputs to use a '${drvName drv}'
+      Suggestion: change ${name}'s ${attrName} to use a '${drvName drv}'
       built from the same version of Python${optionalLocation}.
     ''
     drv;
@@ -180,9 +180,9 @@ let
       pythonNamespacesHook
     ] ++ nativeBuildInputs;
 
-    buildInputs = buildInputs ++ pythonPath;
+    buildInputs = validatePythonMatches "buildInputs" (buildInputs ++ pythonPath);
 
-    propagatedBuildInputs = validatePythonMatches (propagatedBuildInputs ++ [ python ]);
+    propagatedBuildInputs = validatePythonMatches "propagatedBuildInputs" (propagatedBuildInputs ++ [ python ]);
 
     inherit strictDeps;
 
