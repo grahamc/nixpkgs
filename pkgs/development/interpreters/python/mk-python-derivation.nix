@@ -131,8 +131,12 @@ let
           ${leftPadName name (drvName drv)} uses ${python}
           ${leftPadName (drvName drv) name} uses ${toString drv.pythonModule}
 
-      Suggestion: change ${name}'s ${attrName} to use a '${drvName drv}'
-      built from the same version of Python${optionalLocation}.
+      Possible solutions:
+        * change ${name}'s ${attrName} to use a '${drvName drv}'
+          built from the same version of Python${optionalLocation}.
+
+        * move ${drvName drv} from ${attrName} to nativeBuildInputs.
+
     ''
     drv;
 
